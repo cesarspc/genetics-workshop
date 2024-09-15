@@ -1,51 +1,52 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class DistributedStrategy {
 
     private List<Thread> threads;
-    private int splits;
+    private int nThreads;
     private long start; // Start for measure the execution time
     private long end;
+    private ExecutorService executorService;
     
-    public DistributedStrategy(int splits){
+    public DistributedStrategy(int nThreads){
 
         this.threads = new ArrayList<>();
-        this.splits = splits;
+        this.nThreads = nThreads;
         this.start = System.nanoTime();
+        this.executorService = Executors.newFixedThreadPool(nThreads + 1);
     }
 
-    public void bootSaver(ArrayList<String> database){
+    public void bootSaver(ArrayList<String> database, int size){
         threads.clear();
-        int sublistSize = database.size() / this.splits;
+        int sublistSize = size / this.nThreads;
         int index = 0; // Hand the current position
-        List<String> sublist = new ArrayList<>();
 
-        for(int i = 0; i < this.splits + 1; i++){
+        for(int i = 0; i < this.nThreads + 1; i++){
             
             int finalIndex;
 
             // Avoid out of bounds exception
-            if (index + sublistSize > database.size()){
-                finalIndex = database.size();
-            } else {
-                finalIndex = index + sublistSize;
-            }
+            finalIndex = (index + sublistSize) > size ? size : index + sublistSize;
 
-            sublist = database.subList(index, finalIndex);
+            List<String> sublist = database.subList(index, finalIndex);
             index = finalIndex;
-            SaverThread saver = new SaverThread("data/database.txt", sublist);
-            threads.add(saver);
-            saver.start();
+
+            executorService.submit(new SaverThread("data/database.txt", sublist)); // Hand all threads
         }
         
-
-        for(Thread saver : threads){
-            try {
-                saver.join(); // Waits for each thread to finish
-            } catch(InterruptedException e) {
-                System.err.println("Interrupted exception: " + e.getMessage());
+        // Wait for each thread to finish
+        executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+                executorService.shutdownNow();
             }
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
+            System.err.println("Saving error: " + e.getMessage());
         }
         
         List<String> finalText = new ArrayList<>();
