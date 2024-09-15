@@ -7,9 +7,9 @@ import java.util.Random;
 class SequenceAnalysis{
     
     // Parameters
-    private static final int DATABASE_SIZE = 5000;
+    private static final int DATABASE_SIZE = 2000000;
     private static final int SEQUENCE_SIZE = 10;
-    private static final int DISTRIBUTION_RATE = 100; // Number of threads for distribute demanding tasks
+    private static final int DISTRIBUTION_RATE = 10; // Number of threads for distribute demanding tasks
     private static final double[] WEIGHTS = {0.25, 0.25, 0.25, 0.25}; // Must total 1
     private static final char[] NUCLEOTIDES = {'A', 'C', 'G', 'T'};
     private static ArrayList<String> database = new ArrayList<String>();

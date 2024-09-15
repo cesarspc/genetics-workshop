@@ -5,10 +5,14 @@ public class DistributedStrategy {
 
     private List<Thread> threads;
     private int splits;
+    private long start; // Start for measure the execution time
+    private long end;
     
     public DistributedStrategy(int splits){
-        threads = new ArrayList<>();
+
+        this.threads = new ArrayList<>();
         this.splits = splits;
+        this.start = System.nanoTime();
     }
 
     public void bootSaver(ArrayList<String> database){
@@ -48,6 +52,15 @@ public class DistributedStrategy {
         finalText.add("--------------------");
 
         // Insert final string at the end of sequences
-        new SaverThread("data/database.txt", finalText).start(); 
+        new SaverThread("data/database.txt", finalText).start();
+
+        this.finishTask();
+    }
+
+    public void finishTask() {
+        end = System.nanoTime();
+        long duration = (end - start) / 1000000;
+
+        System.out.println("Execution time: " + duration + "ms.");
     }
 }
