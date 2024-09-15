@@ -7,8 +7,9 @@ import java.util.Random;
 class SequenceAnalysis{
     
     // Parameters
-    private static final int DATABASE_SIZE = 1000;
-    private static final int SEQUENCE_SIZE = 20;
+    private static final int DATABASE_SIZE = 5000;
+    private static final int SEQUENCE_SIZE = 10;
+    private static final int DISTRIBUTION_RATE = 100; // Number of threads for distribute demanding tasks
     private static final double[] WEIGHTS = {0.25, 0.25, 0.25, 0.25}; // Must total 1
     private static final char[] NUCLEOTIDES = {'A', 'C', 'G', 'T'};
     private static ArrayList<String> database = new ArrayList<String>();
@@ -28,18 +29,12 @@ class SequenceAnalysis{
         }
 
         // Save txt
-        try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter("databases/database.txt"))) {
-            for (String sequence : database) {
-                fileWriter.write(sequence);
-                fileWriter.newLine();  // Add a newline after each sequence
-            }
-        } catch (IOException e) {
-            System.err.println("Writing error: " + e.getMessage());
-        }
+        DistributedStrategy dStrategy = new DistributedStrategy(DISTRIBUTION_RATE);
+        dStrategy.bootSaver(database);
     }
 
     // Pick nucleotide with given probabilities
-    public static char pickNucleotide(){
+    private static char pickNucleotide(){
         double sum = 0; // Cumulative probability
         double randNumber = new Random().nextDouble();
 
