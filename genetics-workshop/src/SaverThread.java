@@ -1,21 +1,21 @@
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class SaverThread extends Thread{
     private String filePath;
-    private List<String> sequencesToSave;
+    private int nSequences;
 
-    public SaverThread(String filePath, List<String> sequencesToSave) {
+    public SaverThread(String filePath, int nSequences) {
         this.filePath = filePath;
-        this.sequencesToSave = sequencesToSave;
+        this.nSequences = nSequences;
     }
 
     public void run() {
+        List<String> sequences = SequenceAnalysis.generateList(nSequences);
         try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(filePath, true))) { // Write over existing text
-            for (String sequence : this.sequencesToSave) {
+            for (String sequence : sequences) {
                 fileWriter.write(sequence);
                 fileWriter.newLine();
             }
